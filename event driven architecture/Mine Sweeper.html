@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>
+Bomb game
+</title>
+<style type="text/css">
+	body{
+		background-color: BlanchedAlmond;
+	}
+	.little{
+		background: CornflowerBlue;
+		width:  50px;
+		height: 50px;
+		position: absolute;
+	}
+	#title{
+		padding-left: 150px;
+		color:red;
+		font-style: italic;
+	}
+	#instructions{
+		padding-left:700px;
+	}
+	ol{
+		font-size: 20px;
+	}
+</style>
+</head>
+<body>
+<div id="title"><h1>MINE-SWEEPER</h1></div>
+<div id="main_div"></div>
+<div id="instructions"><h1>Instructions</h1><br/>
+<ol>
+<li>The goal is to identify all bombs so that all boxes are opened except the ones with the bombs</li>
+<li>The top left corner is always empty.</li>
+<li>The number displayed in the boxes with no bombs is the number of bombs around that box</li>
+<li>If no number is displayed that means no bomb is around the box</li></ol></div>
+<script type="text/javascript">
+	var allPositions=[];
+	var bombNumber;
+	var boxId;
+	var surrounding=[];
+	var chosenOnes=[];
+	var g;
+	var out="";
+	function layout(){
+		for(var m=0; m<=99; m++){
+			out+="<div class='little' onclick='changeValue(this)'></div>";
+		}
+		main_div.innerHTML=out;
+		console.log(out);
+		g = document.getElementsByClassName("little");
+		for(var i=0; i<=9; i++){
+			for(var j=0; j<=9; j++){
+				g[(i*10)+(j)].style.left=60+(j*55)+'px';
+				g[(i*10)+(j)].style.top=60+(i*55)+'px';
+			}
+		}
+		bombPlaces();
+	}
+	
+	function in_array(element,theArray){
+		var bool=0;
+		for (ij=0; ij<theArray.length; ij++){
+			if (theArray[ij]==element){
+				bool=1;
+			}
+		}
+		if (bool==0){
+			return false;
+		}
+		if (bool==1){
+			return true;
+		}
+	}
+	function bombPlaces(){
+		for(var k=0; k<=14; k++){
+			var position=Math.floor((Math.random() * 99)+1 );
+			if (!in_array(position,allPositions)){
+				allPositions[k]=position;
+			}else{
+				k--;
+			}
+		}
+		console.log(allPositions);
+	}
+	function bombCounter(no){
+		bombNumber=0;
+		surroundingArray(no,"counter");
+		for (jk=0; jk<surrounding.length; jk++){
+			if (in_array(surrounding[jk],allPositions)){
+				if(surrounding[jk]>=0){
+					bombNumber=bombNumber+1;
+				}
+			}
+		}
+		return bombNumber;
+	}
+	function surroundingArray(point,kind){
+		surrounding=[point+1,point-1,point+10,point-10];
+		console.log(surrounding);
+		if(kind=="counter"){
+			surrounding.push(point+9);
+			surrounding.push(point+11);
+			surrounding.push(point-9);
+			surrounding.push(point-11);
+		}
+		console.log(surrounding);
+		for (var lm=0; lm<surrounding.length; lm++){
+			if (surrounding[lm]<0 || surrounding[lm]>99){
+				surrounding.splice(lm, 1);
+				lm--;
+			}
+			console.log(surrounding);
+			if(surrounding[lm]%10==0 && (point+1)%10==0){
+				surrounding.splice(lm, 1);
+				lm--;
+			}
+			console.log(surrounding);
+			if((surrounding[lm]+1)%10==0 && point%10==0){
+				surrounding.splice(lm, 1);
+				lm--;
+			}
+			console.log(surrounding);
+		}
+		
+		return surrounding;
+	}
+	function areaClearer(place){
+		console.log(place);
+		surroundingArray(place,"eliminate")
+		g[place].style.background="LightGray";
+		g[place].innerHTML="";
+		chosenOnes.push(place);
+		for (kl=0; kl<surrounding.length; kl++){
+			console.log(surrounding[kl]);
+			bombCounter(surrounding[kl]);
+			console.log(bombNumber);
+			surroundingArray(place,"eliminate")
+			if (bombNumber==0 && !in_array(surrounding[kl],chosenOnes)){
+				console.log("ghsj");
+				areaClearer(surrounding[kl]);
+			}
+		}
+	}
+	function changeValue(id)
+	{
+		for(var l=0; l<=99; l++){
+			if (g[l]==id){
+				boxId=l;
+			}
+		}
+		if (!in_array(boxId,allPositions)){
+			bombCounter(boxId);
+			if (bombNumber==0){
+				areaClearer(boxId);
+			}else if (g[boxId].innerHTML==""){
+				g[boxId].style.background="LightGray";
+				g[boxId].innerHTML=bombNumber;
+				chosenOnes.push(boxId);
+			}
+		}else{
+				if (g[boxId].innerHTML==""){
+					g[boxId].style.background="Red";
+					g[boxId].innerHTML="BOOM";
+					window.alert("GAME OVER");
+				}
+			}
+	}
+	layout();
+
+</script>
+
+</body>
+</html>
